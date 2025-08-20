@@ -1,5 +1,6 @@
+mod double_link_list;
 mod link_list;
-
+use double_link_list::{Double_LinkList, Double_LinkList_Node};
 use link_list::{LinkList, Node};
 fn main() {
     let list = Node {
@@ -40,4 +41,16 @@ fn main() {
     println!("{:?}", new_link_list.print()); // 4
     println!("Peaking ...");
     println!("{:?}", new_link_list.peak()); // 4
+
+    /* Double link list */
+    let mut d_list = Double_LinkList::new();
+    d_list.add(1);
+    d_list.add(2);
+    d_list.add(3);
+    d_list.add(4);
+    d_list.add(5);
+
+    d_list.remove();
+
+    println!("Printing {:?}", d_list.print());
 }
