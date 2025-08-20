@@ -1,53 +1,6 @@
-#[derive(Debug)]
-struct LinkList<T> {
-    head: Pointer<T>,
-}
-#[derive(Debug)]
-struct Node<T> {
-    element: T,
-    next: Pointer<T>,
-}
-type Pointer<T> = Option<Box<Node<T>>>;
+mod link_list;
 
-impl<T: std::fmt::Debug + std::marker::Copy> LinkList<T> {
-    fn new() -> LinkList<T> {
-        LinkList { head: None }
-    }
-
-    fn add(&mut self, element: T) {
-        let prev = self.head.take();
-        let new_head = Some(Box::new(Node {
-            element: element,
-            next: prev,
-        }));
-        self.head = new_head;
-    }
-
-    fn remove(&mut self) -> Option<T> {
-        match self.head.take() {
-            Some(prev) => {
-                self.head = prev.next;
-                Some(prev.element)
-            }
-            None => None,
-        }
-    }
-
-    fn print(&self) {
-        let mut list_traversal = &self.head;
-        while !list_traversal.is_none() {
-            println!("{:?}", list_traversal.as_ref().unwrap().element);
-            list_traversal = &list_traversal.as_ref().unwrap().next;
-        }
-    }
-
-    fn peak(&self) -> Option<T> {
-        match &self.head {
-            Some(prev) => Some(prev.element),
-            None => None,
-        }
-    }
-}
+use link_list::{LinkList, Node};
 fn main() {
     let list = Node {
         element: 1,
