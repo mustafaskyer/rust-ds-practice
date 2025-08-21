@@ -2,6 +2,20 @@ mod double_link_list;
 mod link_list;
 use double_link_list::{Double_LinkList, Double_LinkList_Node};
 use link_list::{LinkList, Node};
+
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
+#[derive(Debug)]
+struct CustomNode {
+    next: Option<Weak<RefCell<CustomNode>>>,
+}
+
+impl Drop for CustomNode {
+    fn drop(&mut self) {
+        println!("Dropping {:?}", self)
+    }
+}
 fn main() {
     let list = Node {
         element: 1,
@@ -53,4 +67,36 @@ fn main() {
     d_list.remove();
 
     println!("Printing {:?}", d_list.print());
+
+    /* Reporduce ref cycles */
+    let a = Rc::new(RefCell::new(CustomNode { next: None }));
+    println!(
+        "A Count {:?} . Weak count: {:?}",
+        Rc::strong_count(&a),
+        Rc::weak_count(&a)
+    );
+
+    let b = Rc::new(RefCell::new(CustomNode {
+        next: Some(Rc::downgrade(&a)),
+    }));
+    println!("A Count After Created B: {:?}", Rc::strong_count(&a));
+    println!("B Count {:?}", Rc::strong_count(&b));
+
+    let c = Rc::new(RefCell::new(CustomNode {
+        next: Some(Rc::downgrade(&b)),
+    }));
+    println!("A Count After Created C {:?}", Rc::strong_count(&a));
+    println!("B Count After Created C {:?}", Rc::strong_count(&a));
+    println!("C Count {:?}", Rc::strong_count(&b));
+
+    // let a point to c
+    (*a).borrow_mut().next = Some(Rc::downgrade(&c)); // creating a cycle
+
+    println!("Result after creating the cycle");
+    println!("A: {:?}", Rc::strong_count(&a));
+    println!("B: {:?}", Rc::strong_count(&b));
+    println!("C: {:?}", Rc::strong_count(&c));
+
+    // Don't execute this, will cause stack overflow
+    println!("A {:?}", a); // thread 'main' has overflowed its stack . thread 'main' has overflowed its stack
 }
